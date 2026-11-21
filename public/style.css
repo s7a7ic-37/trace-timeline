@@ -101,6 +101,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .span-row .number { color: var(--muted); text-align: end; white-space: nowrap; }
 .empty { padding-block: .6rem; color: var(--muted); }
 .inspector { position: sticky; top: 1rem; }
+.detail-nav { display: none; padding: .35rem .65rem; color: var(--accent); font-size: .85rem; font-weight: 650; }
 #detail-name { margin-top: .5rem; font-weight: 750; font-size: 1.12rem; overflow-wrap: anywhere; }
 .inspector dl { margin: .6rem 0 0; }
 .inspector dl div { display: grid; grid-template-columns: minmax(5.2rem, .8fr) minmax(0, 1.2fr); gap: .5rem; border-top: 1px solid var(--line); padding-block: .47rem; }
@@ -111,6 +112,8 @@ footer { padding-block: .75rem 1rem; }
   .workspace { grid-template-columns: minmax(0, 1fr); }
   .inspector { position: static; }
   #span-list { max-height: 22rem; }
+  .detail-nav { display: inline-block; }
+  #back-to-span { margin-top: .65rem; }
 }
 @media (max-width: 490px) {
   .timeline, .inspector { padding: .75rem; }

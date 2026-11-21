@@ -6,6 +6,8 @@ const fileInput = element("trace-file") as HTMLInputElement;
 const traceChoice = element("trace-choice") as HTMLSelectElement;
 const filter = element("errors-only") as HTMLInputElement;
 const list = element("span-list");
+const viewDetails = element("view-details");
+const backToSpan = element("back-to-span");
 const fileStatus = element("file-status");
 const sample = parseTraces(example);
 let traces = sample;
@@ -21,6 +23,8 @@ function note(text: string, error = false) {
 function showDetail(trace: Trace) {
   element("detail-name").textContent = selected?.name ?? "Choose a span.";
   element("span-details").hidden = !selected;
+  viewDetails.hidden = !selected;
+  backToSpan.hidden = !selected;
   if (!selected) return;
   element("detail-service").textContent = selected.service;
   const status = element("detail-status");
@@ -155,4 +159,14 @@ traceChoice.addEventListener("change", () => {
 });
 
 filter.addEventListener("change", showTrace);
+viewDetails.addEventListener("click", () => {
+  const heading = element("detail-heading");
+  heading.focus({ preventScroll: true });
+  heading.scrollIntoView({ block: "start" });
+});
+backToSpan.addEventListener("click", () => {
+  const row = list.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+  row?.focus({ preventScroll: true });
+  row?.scrollIntoView({ block: "center" });
+});
 load(sample, "Fictional booking example");
