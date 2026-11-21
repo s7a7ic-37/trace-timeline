@@ -105,6 +105,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .inspector dl { margin: .6rem 0 0; }
 .inspector dl div { display: grid; grid-template-columns: minmax(5.2rem, .8fr) minmax(0, 1.2fr); gap: .5rem; border-top: 1px solid var(--line); padding-block: .47rem; }
 .inspector dd { font-size: .86rem; }
+.self-time-note { display: block; margin-top: .15rem; color: var(--muted); font: .75rem/1.4 system-ui, sans-serif; }
 footer { padding-block: .75rem 1rem; }
 @media (max-width: 760px) {
   .workspace { grid-template-columns: minmax(0, 1fr); }

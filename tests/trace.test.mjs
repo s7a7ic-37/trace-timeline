@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { example } from "../dist/example.js";
-import { duration, parseTraces, readTraceText, spanLimit } from "../dist/trace.js";
+import { duration, parseTraces, readTraceText, selfTime, spanLimit } from "../dist/trace.js";
 
 test("joins spans across resources in time order with exact nanosecond bounds", () => {
   const [trace] = parseTraces(example);
@@ -19,6 +19,44 @@ function withSpans(spans) {
 }
 
 const first = example.resourceSpans[0].scopeSpans[0].spans[0];
+
+function timedSpan(id, from, to, parent) {
+  const hex = value => value.toString(16).padStart(16, "0");
+  const timestamp = offset => String(BigInt(first.startTimeUnixNano) + BigInt(offset));
+  return {
+    ...first, spanId: hex(id), parentSpanId: parent ? hex(parent) : "",
+    startTimeUnixNano: timestamp(from), endTimeUnixNano: timestamp(to),
+  };
+}
+
+test("self time clips child intervals and counts overlapping time once", () => {
+  const parent = timedSpan(1, 100, 200);
+  const [trace] = parseTraces(withSpans([
+    timedSpan(2, 186, 210, 1), parent,
+    timedSpan(3, 124, 128, 1), timedSpan(4, 90, 130, 1), timedSpan(5, 201, 230, 1),
+    timedSpan(6, 120, 150, 1), timedSpan(7, 150, 162, 1), timedSpan(8, 170, 188, 1),
+    timedSpan(9, 0, 99, 1), timedSpan(10, 165, 165, 1),
+  ]));
+  assert.equal(selfTime(trace, trace.spans.find(span => span.id === parent.spanId)), 8n);
+});
+
+test("self time excludes direct children only, even if a grandchild extends beyond a child", () => {
+  const parent = timedSpan(1, 10, 90);
+  const child = timedSpan(2, 15, 35, 1);
+  const [trace] = parseTraces(withSpans([parent, child, timedSpan(3, 60, 70, 2)]));
+  assert.equal(selfTime(trace, trace.spans[0]), 60n);
+  assert.equal(selfTime(trace, trace.spans[1]), 20n);
+});
+
+test("self time handles zero duration and spans with a missing parent", () => {
+  const instant = timedSpan(1, 20, 20);
+  const partial = timedSpan(3, 90, 100, 99);
+  const [trace] = parseTraces(withSpans([instant, timedSpan(2, 10, 30, 1), partial, timedSpan(4, 95, 97, 3)]));
+  const find = fixture => trace.spans.find(span => span.id === fixture.spanId);
+  assert.equal(selfTime(trace, find(instant)), 0n);
+  assert.equal(selfTime(trace, find(partial)), 8n);
+  assert.equal(selfTime(trace, trace.spans.at(-1)), 2n);
+});
 
 test("keeps distinct trace IDs separate and accepts a missing parent in a partial file", () => {
   const other = { ...first, traceId: "a".repeat(32), parentSpanId: "a".repeat(16) };
@@ -59,4 +97,5 @@ test("reads JSON emitted by the official OpenTelemetry JavaScript exporter", () 
   assert.equal(child.parent, root.id);
   assert.equal(child.status, "Error");
   assert.equal(child.service, "local-booking-fixture");
+  assert.equal(selfTime(trace, root), 383_300n);
 });

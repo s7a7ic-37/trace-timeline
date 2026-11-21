@@ -98,6 +98,23 @@ export function readTraceText(text: string): Trace[] {
   return parseTraces(payload);
 }
 
+export function selfTime(trace: Trace, span: Span): bigint {
+  let uncovered = span.end - span.start;
+  let coveredThrough = span.start;
+  // Parsed spans are sorted by start, so only subtract newly covered time.
+  for (const child of trace.spans) {
+    if (child.start >= span.end) break;
+    if (child.parent !== span.id) continue;
+    const start = child.start > coveredThrough ? child.start : coveredThrough;
+    const end = child.end < span.end ? child.end : span.end;
+    if (start < end) {
+      uncovered -= end - start;
+      coveredThrough = end;
+    }
+  }
+  return uncovered;
+}
+
 const milliseconds = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
 export function duration(ns: bigint) {

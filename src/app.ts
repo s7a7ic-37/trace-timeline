@@ -1,4 +1,4 @@
-import { duration, fileLimit, parseTraces, readTraceText, type Span, type Trace } from "./trace.js";
+import { duration, fileLimit, parseTraces, readTraceText, selfTime, type Span, type Trace } from "./trace.js";
 import { example } from "./example.js";
 
 const element = (id: string) => document.getElementById(id)!;
@@ -31,6 +31,7 @@ function showDetail(trace: Trace) {
   element("detail-start").textContent = duration(selected.start - trace.start);
   element("detail-end").textContent = duration(selected.end - trace.start);
   element("detail-duration").textContent = duration(selected.end - selected.start);
+  element("detail-self-time").textContent = duration(selfTime(trace, selected));
 }
 
 function makeRow(trace: Trace, span: Span) {
