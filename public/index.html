@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inspect OpenTelemetry trace files in your browser.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Trace Timeline</title>
+  <script src="/theme.js"></script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="wrap bar-inner">
+      <a class="brand" href="/"><img src="/favicon.svg" width="28" height="28" alt="">Trace Timeline</a>
+      <a href="https://portfolio.artemislab.co.uk/#projects">← All projects</a>
+    </div>
+  </header>
+  <main class="wrap">
+    <h1>Inspect a trace</h1>
+    <div class="import">
+      <div class="file-field">
+        <label for="trace-file">Open trace file</label>
+        <input id="trace-file" type="file" accept=".json,application/json" aria-describedby="file-help">
+        <p id="file-help">OTLP JSON · Up to 512 KiB · Read only in this tab</p>
+      </div>
+      <button id="load-example" type="button">Load booking example</button>
+    </div>
+    <p id="file-status" class="notice" role="status"></p>
+    <section class="summary" aria-labelledby="dataset">
+      <div>
+        <h2 id="dataset">Fictional booking example</h2>
+        <div id="trace-control" class="trace-field" hidden>
+          <label for="trace-choice">Trace</label>
+          <select id="trace-choice"></select>
+        </div>
+      </div>
+      <dl>
+        <div><dt>Trace duration</dt><dd id="total-time">—</dd></div>
+        <div><dt>Spans</dt><dd id="span-count">—</dd></div>
+        <div><dt>Errors</dt><dd id="error-count">—</dd></div>
+      </dl>
+    </section>
+    <div class="workspace">
+      <section class="timeline" aria-labelledby="timeline-heading">
+        <div class="section-top">
+          <h2 id="timeline-heading">Span timeline</h2>
+          <label class="filter"><input id="errors-only" type="checkbox">Errors only</label>
+        </div>
+        <div class="axis" aria-hidden="true"><div><span>0 ms</span><span id="time-end">—</span></div></div>
+        <ul id="span-list" aria-label="Spans"></ul>
+        <p id="empty-spans" class="empty" hidden>No error spans in this trace.</p>
+      </section>
+      <aside class="inspector" aria-labelledby="detail-heading">
+        <h2 id="detail-heading">Span details</h2>
+        <p id="detail-name" aria-live="polite">Choose a span.</p>
+        <dl id="span-details" hidden>
+          <div><dt>Service</dt><dd id="detail-service"></dd></div>
+          <div><dt>Status</dt><dd id="detail-status"></dd></div>
+          <div><dt>Parent span</dt><dd id="detail-parent"></dd></div>
+          <div><dt>Start offset</dt><dd id="detail-start" class="number"></dd></div>
+          <div><dt>End offset</dt><dd id="detail-end" class="number"></dd></div>
+          <div><dt>Duration</dt><dd id="detail-duration" class="number"></dd></div>
+        </dl>
+      </aside>
+    </div>
+  </main>
+  <footer class="wrap"><a href="https://github.com/s7a7ic-37/trace-timeline">Project source ↗</a></footer>
+</body>
+</html>
