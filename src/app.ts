@@ -8,6 +8,7 @@ const filter = element("errors-only") as HTMLInputElement;
 const list = element("span-list");
 const viewDetails = element("view-details");
 const backToSpan = element("back-to-span");
+const openParent = element("open-parent");
 const fileStatus = element("file-status");
 const sample = parseTraces(example);
 let traces = sample;
@@ -25,13 +26,14 @@ function showDetail(trace: Trace) {
   element("span-details").hidden = !selected;
   viewDetails.hidden = !selected;
   backToSpan.hidden = !selected;
+  const parent = trace.spans.find(span => span.id === selected?.parent);
+  openParent.hidden = !parent;
   if (!selected) return;
   element("detail-service").textContent = selected.service;
   const status = element("detail-status");
   status.textContent = selected.status;
   status.toggleAttribute("data-error", selected.status === "Error");
-  const parent = trace.spans.find(span => span.id === selected?.parent);
-  element("detail-parent").textContent = parent?.name ?? selected.parent ?? "None";
+  element("detail-parent").textContent = parent?.name ?? (selected.parent ? "Missing from this file (" + selected.parent + ")" : "None");
   element("detail-start").textContent = duration(selected.start - trace.start);
   element("detail-end").textContent = duration(selected.end - trace.start);
   element("detail-duration").textContent = duration(selected.end - selected.start);
@@ -159,10 +161,20 @@ traceChoice.addEventListener("change", () => {
 });
 
 filter.addEventListener("change", showTrace);
-viewDetails.addEventListener("click", () => {
+function focusDetail() {
   const heading = element("detail-heading");
   heading.focus({ preventScroll: true });
   heading.scrollIntoView({ block: "start" });
+}
+
+viewDetails.addEventListener("click", focusDetail);
+openParent.addEventListener("click", () => {
+  const parent = traces[traceIndex].spans.find(span => span.id === selected?.parent);
+  if (!parent) return;
+  if (parent.status !== "Error") filter.checked = false;
+  selected = parent;
+  showTrace();
+  focusDetail();
 });
 backToSpan.addEventListener("click", () => {
   const row = list.querySelector<HTMLButtonElement>('[aria-pressed="true"]');

@@ -60,7 +60,13 @@
         <dl id="span-details" hidden>
           <div><dt>Service</dt><dd id="detail-service"></dd></div>
           <div><dt>Status</dt><dd id="detail-status"></dd></div>
-          <div><dt>Parent span</dt><dd id="detail-parent"></dd></div>
+          <div>
+            <dt>Parent span</dt>
+            <dd>
+              <span id="detail-parent"></span>
+              <button id="open-parent" type="button" aria-controls="span-details" hidden>Open parent span</button>
+            </dd>
+          </div>
           <div><dt>Start offset</dt><dd id="detail-start" class="number"></dd></div>
           <div><dt>End offset</dt><dd id="detail-end" class="number"></dd></div>
           <div><dt>Duration</dt><dd id="detail-duration" class="number"></dd></div>

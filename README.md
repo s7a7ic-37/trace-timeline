@@ -1,6 +1,6 @@
 # Trace Timeline
 
-Open an OpenTelemetry JSON trace and see when each operation started, how long it took and which service ran it. The fictional booking example includes one failed confirmation. Select a span to see its parent, duration and self time.
+Open an OpenTelemetry JSON trace and see when each operation started, how long it took and which service ran it. The fictional booking example includes one failed confirmation. Select a span to see its duration and self time, then follow its parent or return to the selected row.
 
 [Open the viewer](https://traces.artemislab.co.uk/)
 

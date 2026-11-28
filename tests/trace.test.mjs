@@ -74,6 +74,20 @@ test("rejects invalid, unsafe or reversed timestamps and duplicate spans", () =>
   assert.throws(() => parseTraces(withSpans([{ ...first, parentSpanId: first.spanId }])), /own parent/);
 });
 
+test("rejects cycles even when the cyclic spans have a descendant listed first", () => {
+  assert.throws(() => parseTraces(withSpans([
+    timedSpan(4, 0, 100, 2), timedSpan(1, 1, 10, 3),
+    timedSpan(2, 2, 9, 1), timedSpan(3, 3, 8, 2),
+  ])), /parent cycle/);
+});
+
+test("a parent chain may end at a span outside the file", () => {
+  const spans = Array.from({ length: spanLimit }, (_, index) => timedSpan(index + 1, index, index + 1, index + 2));
+  const [trace] = parseTraces(withSpans(spans));
+  assert.equal(trace.spans.length, spanLimit);
+  assert.equal(trace.spans.at(-1).parent, spans.at(-1).parentSpanId);
+});
+
 test("normalizes valid uppercase IDs and bounds the number of spans", () => {
   assert.equal(parseTraces(withSpans([{ ...first, traceId: first.traceId.toUpperCase() }]))[0].id, first.traceId);
   const large = Array.from({ length: spanLimit + 1 }, (_, index) => ({ ...first, spanId: (index + 1).toString(16).padStart(16, "0") }));

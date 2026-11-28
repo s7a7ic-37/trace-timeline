@@ -49,6 +49,21 @@ function serviceName(resourceGroup: Record<string, unknown>) {
   return typeof label === "string" ? label.trim().slice(0, 100) || "Unknown service" : "Unknown service";
 }
 
+function checkParents(spans: Span[]) {
+  const byId = new Map(spans.map(span => [span.id, span]));
+  const checked = new Set<string>();
+  for (const span of spans) {
+    let current: Span | undefined = span;
+    const path = new Set<string>();
+    while (current && !checked.has(current.id)) {
+      if (path.has(current.id)) throw new RangeError("A trace has a parent cycle.");
+      path.add(current.id);
+      current = current.parent ? byId.get(current.parent) : undefined;
+    }
+    for (const id of path) checked.add(id);
+  }
+}
+
 export function parseTraces(payload: unknown): Trace[] {
   const groups = spanArray(record(payload)?.resourceSpans, "resourceSpans");
   const traces = new Map<string, Span[]>();
@@ -82,6 +97,7 @@ export function parseTraces(payload: unknown): Trace[] {
   }
   if (!count) throw new TypeError("This trace file contains no spans.");
   return [...traces].map(([id, spans]) => {
+    checkParents(spans);
     spans.sort((a, b) => a.start < b.start ? -1 : a.start > b.start ? 1 : 0);
     const end = spans.reduce((latest, span) => span.end > latest ? span.end : latest, spans[0].end);
     return { id, spans, start: spans[0].start, end };
